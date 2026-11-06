@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Portfolio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #d8d8d5;
+        --bright: #ffffff;
+        --muted: #737371;
+        --ground: #030303;
+        --line: rgba(255, 255, 255, 0.18);
+        --line-soft: rgba(255, 255, 255, 0.09);
+        --accent: #e21925;
+        --accent-rgb: 226, 25, 37;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        width: 100%;
+        height: 100vh;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .blood-rain {
+        position: fixed;
+        inset: -18vh 0 0;
+        z-index: 0;
+        height: 118vh;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .blood-rain span {
+        position: absolute;
+        top: 0;
+        left: var(--rain-x);
+        width: 1px;
+        height: var(--rain-length);
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(var(--accent-rgb), 0.3) 32%,
+          rgba(var(--accent-rgb), 0.72) 84%,
+          transparent
+        );
+        opacity: var(--rain-opacity);
+        transform: translate3d(0, -22vh, 0) rotate(var(--rain-slant));
+        animation: blood-rain-fall var(--rain-speed) linear var(--rain-delay) infinite;
+        will-change: transform;
+      }
+
+      .blood-rain span:nth-child(3n) { width: 0.5px; }
+
+      @keyframes blood-rain-fall {
+        to {
+          transform: translate3d(var(--rain-drift), 140vh, 0) rotate(var(--rain-slant));
+        }
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100vh;
+        min-height: 0;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        padding: max(2rem, env(safe-area-inset-top)) clamp(1.5rem, 5vw, 5.5rem) max(2rem, env(safe-area-inset-bottom));
+      }
+
+      .rooms {
+        width: min(100%, 1320px);
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .room {
+        appearance: none;
+        position: relative;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        align-items: end;
+        min-width: 0;
+        min-height: clamp(12rem, 27vh, 17rem);
+        padding: clamp(1.4rem, 2.7vw, 2.5rem) clamp(1.1rem, 2.6vw, 2.75rem) 1.25rem;
+        border: 0;
+        border-right: 1px solid var(--line-soft);
+        border-radius: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .room:last-child { border-right: 0; }
+
+      .room::after {
+        content: "";
+        position: absolute;
+        left: clamp(1.1rem, 2.6vw, 2.75rem);
+        right: clamp(1.1rem, 2.6vw, 2.75rem);
+        bottom: -1px;
+        height: 1px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 420ms cubic-bezier(.2,.75,.25,1);
+      }
+
+      .room:focus-visible {
+        outline: 1px solid var(--bright);
+        outline-offset: -5px;
+      }
+
+      .title {
+        display: block;
+        align-self: center;
+        max-width: 100%;
+        color: var(--ink);
+        font-size: clamp(2rem, 4.3vw, 4.3rem);
+        font-weight: 700;
+        line-height: 0.86;
+        letter-spacing: -0.065em;
+        text-transform: uppercase;
+        text-wrap: balance;
+        transition: color 260ms ease, transform 420ms cubic-bezier(.2,.75,.25,1);
+      }
+
+      .detail {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        padding-top: 2rem;
+        color: var(--muted);
+        font-size: 0.58rem;
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        transition: color 260ms ease, transform 420ms cubic-bezier(.2,.75,.25,1);
+      }
+
+      .index {
+        color: var(--accent);
+        letter-spacing: 0.12em;
+      }
+
+      .room:hover::after,
+      .room:focus-visible::after,
+      .room.is-active::after {
+        transform: scaleX(1);
+      }
+
+      .room:hover .title,
+      .room:focus-visible .title,
+      .room.is-active .title {
+        color: var(--bright);
+        transform: translateX(0.5rem);
+      }
+
+      .room:hover .detail,
+      .room:focus-visible .detail,
+      .room.is-active .detail {
+        color: #aaa9a6;
+        transform: translateX(0.25rem);
+      }
+
+      .wordmark {
+        position: fixed;
+        z-index: 2;
+        top: max(1.25rem, env(safe-area-inset-top));
+        left: clamp(1.5rem, 5vw, 5.5rem);
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.55rem;
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+      }
+
+      .wordmark:hover {
+        animation: wordmark-bleed 520ms cubic-bezier(.22,.7,.25,1) both;
+      }
+
+      @keyframes wordmark-bleed {
+        0% { color: var(--muted); text-shadow: 0 0 transparent; transform: translate3d(0, 0, 0); }
+        18% { color: #8d8d8a; text-shadow: -1px 2px rgba(var(--accent-rgb), 0.55); transform: translate3d(0.5px, 0, 0); }
+        42% { text-shadow: 1px 3px rgba(var(--accent-rgb), 0.32); transform: translate3d(-0.5px, 0, 0); }
+        72% { text-shadow: 0 4px rgba(var(--accent-rgb), 0.16); transform: translate3d(0, 0, 0); }
+        100% { color: var(--muted); text-shadow: 0 6px transparent; transform: translate3d(0, 0, 0); }
+      }
+
+      .hint {
+        position: fixed;
+        z-index: 2;
+        right: clamp(1.5rem, 5vw, 5.5rem);
+        bottom: calc(max(1.15rem, env(safe-area-inset-bottom)) + 2.15rem);
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.55rem;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+
+      .site-footer {
+        position: fixed;
+        z-index: 3;
+        right: clamp(1.5rem, 5vw, 5.5rem);
+        bottom: max(1.15rem, env(safe-area-inset-bottom));
+        left: clamp(1.5rem, 5vw, 5.5rem);
+        color: var(--muted);
+      }
+
+      .site-footer::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 1px;
+        margin-bottom: 0.85rem;
+        background: var(--line-soft);
+      }
+
+      .footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.52rem;
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+
+      .footer-actions {
+        display: flex;
+        align-items: center;
+        gap: clamp(1rem, 2.5vw, 2rem);
+      }
+
+      .splashes {
+        position: absolute;
+        top: -4px;
+        right: 0;
+        left: 0;
+        height: 9px;
+        overflow: visible;
+        pointer-events: none;
+      }
+
+      .splash {
+        position: absolute;
+        top: 3px;
+        left: var(--splash-x);
+        width: 2px;
+        height: 2px;
+      }
+
+      .splash::after {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        width: 3px;
+        height: 2px;
+        border-radius: 50%;
+        background: rgba(var(--accent-rgb), 0.72);
+        opacity: 0;
+        animation: splash-impact 420ms ease-out forwards;
+      }
+
+      .splash i {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1.5px;
+        height: 1.5px;
+        border-radius: 50%;
+        background: rgba(var(--accent-rgb), 0.86);
+        opacity: 0;
+        animation: splash-burst 860ms cubic-bezier(.16,.7,.28,1) forwards;
+        transform: translate3d(0, 0, 0);
+      }
+
+      @keyframes splash-impact {
+        0% { opacity: 0; transform: scaleX(0.4); }
+        18% { opacity: 0.72; transform: scaleX(1); }
+        100% { opacity: 0; transform: scaleX(2.2); }
+      }
+
+      @keyframes splash-burst {
+        0% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.7); }
+        12% { opacity: var(--splash-opacity); transform: translate3d(0, -1px, 0) scale(1); }
+        100% { opacity: 0; transform: translate3d(var(--splash-dx), var(--splash-dy), 0) scale(0.2); }
+      }
+
+      .sound-trigger,
+      .contact-trigger,
+      .contact-close {
+        appearance: none;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+        transition: color 220ms ease;
+      }
+
+      .sound-trigger:hover,
+      .sound-trigger:focus-visible,
+      .sound-trigger[aria-pressed="true"],
+      .contact-trigger:hover,
+      .contact-trigger:focus-visible,
+      .contact-close:hover,
+      .contact-close:focus-visible {
+        color: var(--bright);
+      }
+
+      .sound-trigger::after {
+        content: "";
+        display: inline-block;
+        width: 3px;
+        height: 3px;
+        margin-left: 0.55rem;
+        border-radius: 50%;
+        background: var(--muted);
+        vertical-align: 0.1em;
+        transition: background 220ms ease, box-shadow 220ms ease;
+      }
+
+      .sound-trigger[aria-pressed="true"]::after {
+        background: var(--accent);
+        box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.12);
+      }
+
+      .sound-trigger:focus-visible,
+      .contact-trigger:focus-visible,
+      .contact-close:focus-visible {
+        outline: 1px solid var(--bright);
+        outline-offset: 0.35rem;
+      }
+
+      .contact-view {
+        position: fixed;
+        z-index: 4;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: max(2rem, env(safe-area-inset-top)) clamp(1.5rem, 5vw, 5.5rem) max(2rem, env(safe-area-inset-bottom));
+        background: var(--ground);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 240ms ease, visibility 0s linear 240ms;
+      }
+
+      .contact-view.is-open {
+        opacity: 1;
+        visibility: visible;
+        transition-delay: 0s;
+      }
+
+      .contact-view[aria-hidden="true"] {
+        pointer-events: none;
+      }
+
+      .contact-panel {
+        width: min(100%, 1320px);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line-soft);
+        padding: clamp(2.5rem, 8vw, 7rem) 0;
+      }
+
+      .contact-label {
+        margin: 0 0 1rem;
+        color: var(--muted);
+        font-size: 0.55rem;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+
+      .contact-handle {
+        margin: 0;
+        color: var(--ink);
+        font-size: clamp(2.4rem, 7vw, 7.5rem);
+        font-weight: 700;
+        line-height: 0.9;
+        letter-spacing: -0.06em;
+      }
+
+      .contact-close {
+        position: absolute;
+        top: max(1.25rem, env(safe-area-inset-top));
+        right: clamp(1.5rem, 5vw, 5.5rem);
+        font-size: 0.55rem;
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: 0.22em;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          padding-inline: 0.85rem;
+        }
+
+        .rooms {
+          width: 100%;
+        }
+
+        .room {
+          min-height: clamp(10rem, 27vh, 13rem);
+          padding: 1.25rem 0.55rem 0.9rem;
+        }
+
+        .room::after {
+          left: 0.55rem;
+          right: 0.55rem;
+        }
+
+        .title {
+          font-size: clamp(1rem, 5vw, 2rem);
+          line-height: 0.9;
+          letter-spacing: -0.07em;
+        }
+
+        .detail {
+          display: grid;
+          justify-content: start;
+          gap: 0.45rem;
+          padding-top: 1.15rem;
+          font-size: 0.47rem;
+          letter-spacing: 0.14em;
+        }
+
+        .detail span:last-child { display: none; }
+
+        .room:hover .title,
+        .room:focus-visible .title,
+        .room.is-active .title {
+          transform: translateX(0.22rem);
+        }
+
+        .wordmark { left: 0.85rem; }
+
+        .hint { display: none; }
+
+        .site-footer {
+          right: 0.85rem;
+          left: 0.85rem;
+        }
+
+        .contact-view {
+          padding-inline: 0.85rem;
+        }
+
+        .contact-close { right: 0.85rem; }
+
+        .contact-handle {
+          font-size: clamp(2rem, 10.5vw, 4rem);
+        }
+      }
+
+      @media (hover: none) {
+        .room:active .title { color: var(--bright); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .blood-rain { display: none; }
+
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blood-rain" aria-hidden="true"></div>
+    <p class="wordmark">omari/tears</p>
+
+    <main aria-label="Portfolio rooms">
+      <nav class="rooms" aria-label="Choose a portfolio room">
+        <a class="room" href="design.html" data-room="design" aria-pressed="false">
+          <span class="title">Graphic Design</span>
+          <span class="detail" aria-hidden="true">
+            <span class="index">01</span>
+            <span>image / type / feeling</span>
+          </span>
+        </a>
+
+        <a class="room" href="web-design.html" data-room="web" aria-pressed="false">
+          <span class="title">Web Design</span>
+          <span class="detail" aria-hidden="true">
+            <span class="index">02</span>
+            <span>systems / motion / interface</span>
+          </span>
+        </a>
+
+        <a class="room" href="product-design.html" data-room="product" aria-pressed="false">
+          <span class="title">Product Design</span>
+          <span class="detail" aria-hidden="true">
+            <span class="index">03</span>
+            <span>form / fabric / body</span>
+          </span>
+        </a>
+      </nav>
+    </main>
+
+    <p class="hint" aria-hidden="true">select a room</p>
+
+    <footer class="site-footer">
+      <div class="splashes" aria-hidden="true"></div>
+      <div class="footer-row">
+        <span>© 2026 buymytears</span>
+        <span class="footer-actions">
+          <button class="sound-trigger" type="button" aria-pressed="false" aria-label="Turn rain sound on">Sound</button>
+          <a class="contact-trigger" href="https://instagram.com/impouringtears?mdxt=a3Vkd2txOHRyZHN5&utm_source=qr" target="_blank" rel="noopener noreferrer" style="text-decoration:none">Contact</a>
+        </span>
+      </div>
+    </footer>
+
+    <section class="contact-view" id="contact-view" aria-label="Contact" aria-hidden="true">
+      <button class="contact-close" type="button">Close</button>
+      <div class="contact-panel">
+        <p class="contact-label">Instagram</p>
+        <p class="contact-handle">@impouringtears</p>
+      </div>
+    </section>
+
+    <script>
+      (function () {
+        var rain = document.querySelector('.blood-rain');
+        var buttons = Array.prototype.slice.call(document.querySelectorAll('.room'));
+        var contactTrigger = document.querySelector('.contact-trigger');
+        var contactView = document.querySelector('.contact-view');
+        var contactClose = document.querySelector('.contact-close');
+        var soundTrigger = document.querySelector('.sound-trigger');
+        var splashes = document.querySelector('.splashes');
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var audioContext = null;
+        var rainGain = null;
+        var soundOn = false;
+        var active = null;
+
+        for (var i = 0; i < 32; i += 1) {
+          var drop = document.createElement('span');
+          var lane = (i * 43 + 7) % 101;
+          var length = 28 + ((i * 29) % 58);
+          var speed = 5.4 + ((i * 17) % 42) / 10;
+          var delay = -((i * 23) % 93) / 10;
+          var opacity = 0.2 + ((i * 11) % 17) / 100;
+          var drift = -10 + ((i * 19) % 21);
+
+          drop.style.setProperty('--rain-x', lane + '%');
+          drop.style.setProperty('--rain-length', length + 'px');
+          drop.style.setProperty('--rain-speed', speed + 's');
+          drop.style.setProperty('--rain-delay', delay + 's');
+          drop.style.setProperty('--rain-opacity', opacity);
+          drop.style.setProperty('--rain-drift', drift + 'px');
+          drop.style.setProperty('--rain-slant', (drift / 10) + 'deg');
+          rain.appendChild(drop);
+        }
+
+        function setRoom(button) {
+          buttons.forEach(function (item) {
+            var selected = item === button;
+            item.classList.toggle('is-active', selected);
+            item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+          });
+          active = button;
+        }
+
+        buttons.forEach(function (button) {
+          button.addEventListener('click', function () {
+            if (active === button) {
+              button.classList.remove('is-active');
+              button.setAttribute('aria-pressed', 'false');
+              active = null;
+            } else {
+              setRoom(button);
+            }
+          });
+        });
+
+        function openContact() {
+          contactView.classList.add('is-open');
+          contactView.setAttribute('aria-hidden', 'false');
+          contactTrigger.setAttribute('aria-expanded', 'true');
+          contactClose.focus();
+        }
+
+        function closeContact() {
+          contactView.classList.remove('is-open');
+          contactView.setAttribute('aria-hidden', 'true');
+          contactTrigger.setAttribute('aria-expanded', 'false');
+          contactTrigger.focus();
+        }
+
+        function setupRainAudio() {
+          var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          var frameCount;
+          var buffer;
+          var data;
+          var source;
+          var highpass;
+          var lowpass;
+
+          if (!AudioContextClass || audioContext) return;
+
+          audioContext = new AudioContextClass();
+          frameCount = audioContext.sampleRate * 2;
+          buffer = audioContext.createBuffer(1, frameCount, audioContext.sampleRate);
+          data = buffer.getChannelData(0);
+
+          for (var j = 0; j < frameCount; j += 1) {
+            data[j] = (Math.random() * 2 - 1) * (0.58 + Math.random() * 0.42);
+          }
+
+          source = audioContext.createBufferSource();
+          highpass = audioContext.createBiquadFilter();
+          lowpass = audioContext.createBiquadFilter();
+          rainGain = audioContext.createGain();
+
+          source.buffer = buffer;
+          source.loop = true;
+          highpass.type = 'highpass';
+          highpass.frequency.value = 650;
+          highpass.Q.value = 0.45;
+          lowpass.type = 'lowpass';
+          lowpass.frequency.value = 5200;
+          lowpass.Q.value = 0.35;
+          rainGain.gain.value = 0.0001;
+
+          source.connect(highpass);
+          highpass.connect(lowpass);
+          lowpass.connect(rainGain);
+          rainGain.connect(audioContext.destination);
+          source.start();
+        }
+
+        function setRainSound(enabled) {
+          var now;
+          setupRainAudio();
+          if (!audioContext || !rainGain) return;
+
+          audioContext.resume();
+          now = audioContext.currentTime;
+          rainGain.gain.cancelScheduledValues(now);
+          rainGain.gain.setValueAtTime(Math.max(rainGain.gain.value, 0.0001), now);
+          rainGain.gain.exponentialRampToValueAtTime(enabled ? 0.045 : 0.0001, now + 0.65);
+          soundOn = enabled;
+          soundTrigger.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+          soundTrigger.setAttribute('aria-label', enabled ? 'Turn rain sound off' : 'Turn rain sound on');
+        }
+
+        function makeSplash() {
+          var burst = document.createElement('span');
+          var particles = 5;
+          burst.className = 'splash';
+          burst.style.setProperty('--splash-x', (3 + Math.random() * 94) + '%');
+
+          for (var j = 0; j < particles; j += 1) {
+            var particle = document.createElement('i');
+            var direction = j - 2;
+            particle.style.setProperty('--splash-dx', (direction * (2.5 + Math.random() * 3)) + 'px');
+            particle.style.setProperty('--splash-dy', (-4 - Math.random() * 6) + 'px');
+            particle.style.setProperty('--splash-opacity', (0.42 + Math.random() * 0.32).toFixed(2));
+            particle.style.animationDelay = (j * 18) + 'ms';
+            burst.appendChild(particle);
+          }
+
+          splashes.appendChild(burst);
+          window.setTimeout(function () { burst.remove(); }, 1050);
+        }
+
+        if (!reduceMotion) {
+          window.setInterval(function () {
+            makeSplash();
+            if (Math.random() > 0.58) makeSplash();
+          }, 390);
+        }
+
+        soundTrigger.addEventListener('click', function () {
+          setRainSound(!soundOn);
+        });
+        contactClose.addEventListener('click', closeContact);
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape' && contactView.classList.contains('is-open')) {
+            closeContact();
+          }
+        });
+      }());
+    </script>
+  
+    
+    
+    
+    
+    
+    
+  </body>
+</html>
